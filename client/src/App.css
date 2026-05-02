@@ -197,3 +197,63 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-displa
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ─── LOADER ───────────────────────────────────────────────────────────────── */
+.loader {
+  max-width: 480px; margin: 4rem auto;
+  display: flex; flex-direction: column; align-items: center; gap: 1.25rem;
+  padding: 2.5rem 2rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+}
+
+.loader-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--surface2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loader-title {
+  font-size: 1.1rem; font-weight: 700; color: var(--text);
+  font-family: var(--font-display);
+}
+
+.loader-steps {
+  list-style: none; width: 100%;
+  display: flex; flex-direction: column; gap: 0.4rem;
+}
+
+.loader-step {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.5rem 0.75rem; border-radius: 8px;
+  font-size: 0.85rem; font-family: var(--font-mono);
+  color: var(--text-muted); transition: color 0.25s, background 0.25s;
+}
+.loader-step--active {
+  color: var(--text);
+  background: rgba(107,92,231,0.07);
+}
+.loader-step--done {
+  color: var(--text-muted);
+}
+.loader-step--pending {
+  opacity: 0.4;
+}
+
+.loader-step-indicator {
+  width: 14px; flex-shrink: 0;
+  font-size: 0.75rem; color: var(--green);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.loader-step-dot {
+  display: block; width: 6px; height: 6px;
+  background: var(--accent); border-radius: 50%;
+  animation: loader-dot-pulse 1s ease-in-out infinite;
+}
+
+@keyframes loader-dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}

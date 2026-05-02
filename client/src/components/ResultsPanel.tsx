@@ -1,5 +1,14 @@
 import { useState } from 'react';
 import { GenerateResponse, ExecuteResponse, TestCase } from '../services/api';
+import Loader from './Loader';
+
+const EXECUTE_STEPS = [
+  'Preparing requests',
+  'Sending HTTP requests to the API',
+  'Collecting responses',
+  'Evaluating assertions',
+  'Compiling results',
+];
 
 interface Props {
   data: GenerateResponse;
@@ -25,6 +34,10 @@ export default function ResultsPanel({ data, execResults, onExecute, executing }
 
   const getExecResult = (tcId: string) =>
     execResults?.results?.find(r => r.id === tcId);
+
+  if (executing) {
+    return <Loader title="Executing test cases" steps={EXECUTE_STEPS} />;
+  }
 
   return (
     <div className="results-panel">

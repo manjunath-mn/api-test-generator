@@ -1,6 +1,16 @@
 import { useState } from 'react';
 import UploadPanel from './components/UploadPanel';
 import ResultsPanel from './components/ResultsPanel';
+import Loader from './components/Loader';
+
+const GENERATE_STEPS = [
+  'Reading the specification',
+  'Discovering endpoints',
+  'Analysing request and response schemas',
+  'Building prompts for the language model',
+  'Requesting the AI to generate test cases',
+  'Assembling your test suite',
+];
 import { generateTests, executeTests, GenerateResponse, ExecuteResponse, TestCase } from './services/api';
 import './App.css';
 
@@ -64,7 +74,8 @@ export default function App() {
             <button onClick={() => setError(null)}>✕</button>
           </div>
         )}
-        {stage === 'upload' && <UploadPanel onSubmit={handleGenerate} loading={loading} />}
+        {stage === 'upload' && !loading && <UploadPanel onSubmit={handleGenerate} loading={loading} />}
+        {loading && <Loader title="Generating your test suite" steps={GENERATE_STEPS} />}
         {stage === 'results' && data && (
           <ResultsPanel data={data} execResults={execResults} onExecute={handleExecute} executing={executing} />
         )}
