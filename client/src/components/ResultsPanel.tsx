@@ -35,6 +35,21 @@ export default function ResultsPanel({ data, execResults, onExecute, executing }
   const getExecResult = (tcId: string) =>
     execResults?.results?.find(r => r.id === tcId);
 
+  const getTooltip = (exec: ReturnType<typeof getExecResult>): string => {
+    if (!exec) return '';
+    const r = exec.result;
+    if (r.passed) {
+      const lines = [`Status ${r.actualStatus} matched expected ${r.expectedStatus}`];
+      if (exec.expectedBodyContains && r.bodyMatch) lines.push('Response body matched');
+      return lines.join('\n');
+    }
+    const lines: string[] = [];
+    if (!r.statusMatch) lines.push(`Status ${r.actualStatus} — expected ${r.expectedStatus}`);
+    if (exec.expectedBodyContains && !r.bodyMatch) lines.push('Response body did not match');
+    if (r.error) lines.push(`Error: ${r.error}`);
+    return lines.join('\n') || 'Test failed';
+  };
+
   if (executing) {
     return <Loader title="Executing test cases" steps={EXECUTE_STEPS} />;
   }
@@ -84,9 +99,12 @@ export default function ResultsPanel({ data, execResults, onExecute, executing }
                   <span className="tc-desc">{tc.description}</span>
                   <span className="tc-status-badge">
                     {exec ? (
-                      <span className={exec.result.passed ? 'pass' : 'fail'}>{exec.result.passed ? '✓ PASS' : '✗ FAIL'}</span>
+                      <span className={`status-pill status-pill--${exec.result.passed ? 'pass' : 'fail'}`}>
+                        {exec.result.passed ? 'PASS' : 'FAIL'}
+                        <span className="status-pill-tooltip">{getTooltip(exec)}</span>
+                      </span>
                     ) : (
-                      <span className="pending">{tc.expectedStatus}</span>
+                      <span className="status-pill status-pill--pending">{tc.expectedStatus}</span>
                     )}
                   </span>
                 </div>
