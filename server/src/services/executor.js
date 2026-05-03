@@ -27,7 +27,7 @@ async function runSingleTest(tc, baseUrl) {
     });
 
     const duration = Date.now() - startTime;
-    const statusMatch = response.status === tc.expectedStatus;
+    const statusMatch = response.status === Number(tc.expectedStatus);
 
     const bodyMatch = tc.expectedBodyContains
       ? JSON.stringify(response.data).includes(tc.expectedBodyContains)

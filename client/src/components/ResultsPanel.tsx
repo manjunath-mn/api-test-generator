@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { GenerateResponse, ExecuteResponse, TestCase } from '../services/api';
+import { buildReport, exportJSON, exportHTML } from '../services/reporter';
 import Loader from './Loader';
 
 const EXECUTE_STEPS = [
@@ -137,6 +138,13 @@ export default function ResultsPanel({ data, execResults, onExecute, executing }
           {executing ? <span className="btn-loading"><span className="spinner" /> Executing...</span> : '▶ Execute Tests'}
         </button>
         {!data.api.baseUrl && <span className="no-baseurl">No base URL — execution disabled</span>}
+        {execResults && (
+          <div className="export-group">
+            <span className="export-label">Export report</span>
+            <button className="export-btn" onClick={() => exportJSON(buildReport(data, execResults))}>JSON</button>
+            <button className="export-btn" onClick={() => exportHTML(buildReport(data, execResults))}>HTML</button>
+          </div>
+        )}
       </div>
     </div>
   );
