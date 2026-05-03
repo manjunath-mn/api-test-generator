@@ -15,12 +15,17 @@ router.post('/', async (req, res) => {
     const parsed = await parseSpec(spec);
 
     const allTestCases = [];
+    let tcCounter = 1;
 
     for (const endpoint of parsed.endpoints) {
       const testCases = await generateTestCases(endpoint, strategy);
+      const uniqueTestCases = testCases.map(tc => ({
+        ...tc,
+        id: `tc_${String(tcCounter++).padStart(3, '0')}`,
+      }));
       allTestCases.push({
         endpoint: `${endpoint.method} ${endpoint.path}`,
-        testCases,
+        testCases: uniqueTestCases,
       });
     }
 

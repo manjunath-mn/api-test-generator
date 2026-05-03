@@ -197,7 +197,7 @@ function parseTestCasesFromResponse(raw, endpoint) {
       headers: tc.headers || {},
       queryParams: tc.queryParams || {},
       body: tc.body || null,
-      expectedStatus: tc.expectedStatus || 200,
+      expectedStatus: Number(tc.expectedStatus) || 200,
       expectedBodyContains: tc.expectedBodyContains || null,
     }));
   } catch (err) {

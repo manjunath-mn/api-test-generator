@@ -227,6 +227,20 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-displa
 .execute-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .no-baseurl { font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono); }
 
+.export-group {
+  display: flex; align-items: center; gap: 0.5rem; margin-left: auto;
+}
+.export-label {
+  font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono);
+}
+.export-btn {
+  padding: 0.4rem 0.9rem;
+  background: none; border: 1px solid var(--border); border-radius: var(--radius);
+  color: var(--text-muted); font-family: var(--font-mono); font-size: 0.78rem;
+  cursor: pointer; transition: all 0.2s;
+}
+.export-btn:hover { border-color: var(--accent); color: var(--text); }
+
 /* SPINNER */
 .btn-loading { display: flex; align-items: center; gap: 0.5rem; }
 .spinner {
