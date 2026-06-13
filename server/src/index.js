@@ -6,6 +6,7 @@ require('./db/init');
 const generateRouter = require('./routes/generate');
 const executeRouter = require('./routes/execute');
 const authRouter = require('./routes/auth');
+const reportsRouter = require('./routes/reports');
 const { verifyToken } = require('./middleware/auth');
 
 const app = express();
@@ -18,5 +19,6 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRouter);
 app.use('/api/generate', verifyToken, generateRouter);
 app.use('/api/execute', verifyToken, executeRouter);
+app.use('/api/reports', verifyToken, reportsRouter);
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

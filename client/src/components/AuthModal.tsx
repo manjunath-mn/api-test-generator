@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import * as authApi from '../services/authApi';
+import { Overlay, Modal, Title, Subtitle, ErrorMessage, Form, Input, SubmitButton, ToggleButton, Divider, GoogleButtonWrapper } from './AuthModal.styles';
 
 interface AuthModalProps {
   onAuthSuccess: (token: string, email: string) => void;
@@ -12,6 +14,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthSuccess }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      setError('Google sign-in failed');
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    try {
+      const result = await authApi.googleLogin(credentialResponse.credential);
+      localStorage.setItem('authToken', result.token);
+      localStorage.setItem('authEmail', result.email);
+      onAuthSuccess(result.token, result.email);
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'An error occurred';
+      const apiError = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setError(apiError || errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,46 +65,53 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthSuccess }) => {
   };
 
   return (
-    <div style={styles.overlay}>
-      <div style={styles.modal}>
-        <h1 style={styles.title}>API Test Generator</h1>
-        <p style={styles.subtitle}>{isLogin ? 'Sign in to your account' : 'Create a new account'}</p>
+    <Overlay>
+      <Modal>
+        <Title>API Test Generator</Title>
+        <Subtitle>{isLogin ? 'Sign in to your account' : 'Create a new account'}</Subtitle>
 
-        {error && <div style={styles.error}>{error}</div>}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <input
+        <GoogleButtonWrapper>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError('Google sign-in failed')}
+            width="100%"
+          />
+        </GoogleButtonWrapper>
+
+        <Divider>or</Divider>
+
+        <Form onSubmit={handleSubmit}>
+          <Input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={styles.input}
           />
-          <input
+          <Input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={styles.input}
           />
           {!isLogin && (
-            <input
+            <Input
               type="password"
               placeholder="Confirm Password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              style={styles.input}
             />
           )}
-          <button type="submit" disabled={loading} style={styles.button}>
+          <SubmitButton type="submit" disabled={loading}>
             {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Sign Up'}
-          </button>
-        </form>
+          </SubmitButton>
+        </Form>
 
-        <button
+        <ToggleButton
           type="button"
           onClick={() => {
             setIsLogin(!isLogin);
@@ -89,84 +119,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthSuccess }) => {
             setPassword('');
             setConfirmPassword('');
           }}
-          style={styles.toggleButton}
         >
           {isLogin ? 'Need an account? Sign up' : 'Already have an account? Sign in'}
-        </button>
-      </div>
-    </div>
+        </ToggleButton>
+      </Modal>
+    </Overlay>
   );
-};
-
-const styles = {
-  overlay: {
-    position: 'fixed' as const,
-    inset: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-  },
-  modal: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '40px',
-    maxWidth: '400px',
-    width: '100%',
-    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
-  },
-  title: {
-    margin: '0 0 8px',
-    fontSize: '28px',
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-  },
-  subtitle: {
-    margin: '0 0 24px',
-    fontSize: '14px',
-    color: '#666',
-  },
-  error: {
-    backgroundColor: '#fee',
-    color: '#c33',
-    padding: '12px',
-    borderRadius: '4px',
-    marginBottom: '16px',
-    fontSize: '14px',
-  },
-  form: {
-    display: 'flex' as const,
-    flexDirection: 'column' as const,
-    gap: '12px',
-    marginBottom: '16px',
-  },
-  input: {
-    padding: '10px 12px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    fontSize: '14px',
-    fontFamily: 'inherit',
-    boxSizing: 'border-box' as const,
-  },
-  button: {
-    padding: '10px 16px',
-    backgroundColor: '#0066cc',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    fontSize: '14px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  },
-  toggleButton: {
-    padding: 0,
-    backgroundColor: 'transparent',
-    color: '#0066cc',
-    border: 'none',
-    fontSize: '14px',
-    cursor: 'pointer',
-    textDecoration: 'underline',
-  },
 };

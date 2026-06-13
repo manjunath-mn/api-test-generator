@@ -16,3 +16,8 @@ export async function login(email: string, password: string): Promise<AuthRespon
   const res = await axios.post(`${BASE_URL}/auth/login`, { email, password });
   return res.data;
 }
+
+export async function googleLogin(credential: string): Promise<AuthResponse> {
+  const res = await axios.post(`${BASE_URL}/auth/google`, { credential });
+  return res.data;
+}

@@ -3,6 +3,9 @@ import UploadPanel from './components/UploadPanel';
 import ResultsPanel from './components/ResultsPanel';
 import Loader from './components/Loader';
 import { AuthModal } from './components/AuthModal';
+import Nav, { View } from './components/Nav';
+import ProfilePage from './components/ProfilePage';
+import ReportsPage from './components/ReportsPage';
 
 const GENERATE_STEPS = [
   'Reading the specification',
@@ -13,11 +16,12 @@ const GENERATE_STEPS = [
   'Assembling your test suite',
 ];
 import { generateTests, executeTests, GenerateResponse, ExecuteResponse, TestCase } from './services/api';
-import './App.css';
+import { AppContainer, AppHeader, Logo, LogoIcon, LogoText, HeaderActions, UserEmail, BackButton, AppMain, ErrorBanner } from './App.styles';
 
 export default function App() {
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [view, setView] = useState<View>('testing');
   const [stage, setStage] = useState<'upload' | 'results'>('upload');
   const [loading, setLoading] = useState(false);
   const [executing, setExecuting] = useState(false);
@@ -81,44 +85,51 @@ export default function App() {
   };
 
   return (
-    <div className="app">
+    <AppContainer>
       {!token ? (
         <AuthModal onAuthSuccess={handleAuthSuccess} />
       ) : (
         <>
-          <header className="app-header">
-            <div className="logo">
-              <span className="logo-icon">⚡</span>
-              <span className="logo-text">API<strong>Test</strong>Genx</span>
-            </div>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <span style={{ fontSize: '14px', color: '#666' }}>{email}</span>
-              {stage === 'results' && (
-                <button className="back-btn" onClick={() => { setStage('upload'); setData(null); setExecResults(null); }}>
+          <AppHeader>
+            <Logo>
+              <LogoIcon>⚡</LogoIcon>
+              <LogoText>API<strong>Test</strong>Genx</LogoText>
+            </Logo>
+            <Nav active={view} onChange={setView} />
+            <HeaderActions>
+              <UserEmail>{email}</UserEmail>
+              {view === 'testing' && stage === 'results' && (
+                <BackButton onClick={() => { setStage('upload'); setData(null); setExecResults(null); }}>
                   ← New Spec
-                </button>
+                </BackButton>
               )}
-              <button className="back-btn" onClick={handleLogout}>
+              <BackButton onClick={handleLogout}>
                 Logout
-              </button>
-            </div>
-          </header>
+              </BackButton>
+            </HeaderActions>
+          </AppHeader>
 
-          <main className="app-main">
+          <AppMain>
             {error && (
-              <div className="error-banner">
+              <ErrorBanner>
                 <strong>Error:</strong> {error}
                 <button onClick={() => setError(null)}>✕</button>
-              </div>
+              </ErrorBanner>
             )}
-            {stage === 'upload' && !loading && <UploadPanel onSubmit={handleGenerate} loading={loading} />}
-            {loading && <Loader title="Generating your test suite" steps={GENERATE_STEPS} />}
-            {stage === 'results' && data && (
-              <ResultsPanel data={data} execResults={execResults} onExecute={handleExecute} executing={executing} />
+            {view === 'testing' && (
+              <>
+                {stage === 'upload' && !loading && <UploadPanel onSubmit={handleGenerate} loading={loading} />}
+                {loading && <Loader title="Generating your test suite" steps={GENERATE_STEPS} />}
+                {stage === 'results' && data && (
+                  <ResultsPanel data={data} execResults={execResults} onExecute={handleExecute} executing={executing} />
+                )}
+              </>
             )}
-          </main>
+            {view === 'reports' && <ReportsPage />}
+            {view === 'profile' && <ProfilePage email={email ?? ''} token={token ?? ''} />}
+          </AppMain>
         </>
       )}
-    </div>
+    </AppContainer>
   );
 }

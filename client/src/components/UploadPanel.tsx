@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import {
+  Panel, PanelHeader, ToggleRow, ToggleButton, TextInput, TextArea,
+  StrategyRow, StrategyOptions, StrategyButton, SubmitButton, BtnLoading, Spinner,
+} from './UploadPanel.styles';
 
 interface Props {
   onSubmit: (data: { specInput: string; baseUrl: string; strategy: string }) => void;
@@ -12,34 +16,32 @@ export default function UploadPanel({ onSubmit, loading }: Props) {
   const [inputMode, setInputMode] = useState<'url' | 'json'>('url');
 
   return (
-    <div className="upload-panel">
-      <div className="panel-header">
+    <Panel>
+      <PanelHeader>
         <h2>API Specification</h2>
         <p>Provide an OpenAPI / Swagger spec to generate test cases</p>
-      </div>
+      </PanelHeader>
 
-      <div className="toggle-row">
+      <ToggleRow>
         {(['url', 'json'] as const).map(mode => (
-          <button
+          <ToggleButton
             key={mode}
-            className={`toggle-btn ${inputMode === mode ? 'active' : ''}`}
+            $active={inputMode === mode}
             onClick={() => setInputMode(mode)}
           >
             {mode.toUpperCase()}
-          </button>
+          </ToggleButton>
         ))}
-      </div>
+      </ToggleRow>
 
       {inputMode === 'url' ? (
-        <input
-          className="text-input"
+        <TextInput
           placeholder="https://petstore.swagger.io/v2/swagger.json"
           value={specInput}
           onChange={e => setSpecInput(e.target.value)}
         />
       ) : (
-        <textarea
-          className="text-input textarea"
+        <TextArea
           placeholder='{ "openapi": "3.0.0", ... }'
           value={specInput}
           onChange={e => setSpecInput(e.target.value)}
@@ -47,37 +49,35 @@ export default function UploadPanel({ onSubmit, loading }: Props) {
         />
       )}
 
-      <input
-        className="text-input"
+      <TextInput
         placeholder="Base URL for test execution (e.g. https://petstore.swagger.io/v2)"
         value={baseUrl}
         onChange={e => setBaseUrl(e.target.value)}
       />
 
-      <div className="strategy-row">
+      <StrategyRow>
         <label>Prompting Strategy</label>
-        <div className="strategy-options">
+        <StrategyOptions>
           {['zero-shot', 'few-shot', 'chain-of-thought'].map(s => (
-            <button
+            <StrategyButton
               key={s}
-              className={`strategy-btn ${strategy === s ? 'active' : ''}`}
+              $active={strategy === s}
               onClick={() => setStrategy(s)}
             >
               {s}
-            </button>
+            </StrategyButton>
           ))}
-        </div>
-      </div>
+        </StrategyOptions>
+      </StrategyRow>
 
-      <button
-        className="submit-btn"
+      <SubmitButton
         onClick={() => onSubmit({ specInput, baseUrl, strategy })}
         disabled={loading || !specInput.trim()}
       >
         {loading ? (
-          <span className="btn-loading"><span className="spinner" /> Generating...</span>
+          <BtnLoading><Spinner /> Generating...</BtnLoading>
         ) : 'Generate Test Cases'}
-      </button>
-    </div>
+      </SubmitButton>
+    </Panel>
   );
 }
