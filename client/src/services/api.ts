@@ -1,6 +1,27 @@
 import axios from 'axios';
 
-const BASE = 'http://localhost:5001/api';
+const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
+
+const apiClient = axios.create({ baseURL: BASE });
+
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('authToken');
+      window.location.href = '/';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export interface TestCase {
   id: string;
@@ -46,11 +67,11 @@ export interface ExecuteResponse {
 }
 
 export async function generateTests(spec: unknown, strategy: string): Promise<GenerateResponse> {
-  const res = await axios.post(`${BASE}/generate`, { spec, strategy });
+  const res = await apiClient.post(`/generate`, { spec, strategy });
   return res.data;
 }
 
 export async function executeTests(testCases: TestCase[], baseUrl: string): Promise<ExecuteResponse> {
-  const res = await axios.post(`${BASE}/execute`, { testCases, baseUrl });
+  const res = await apiClient.post(`/execute`, { testCases, baseUrl });
   return res.data;
 }
