@@ -11,8 +11,12 @@ async function generateTestCases(endpoint, strategy = 'zero-shot') {
     messages: [{ role: 'user', content: prompt }],
   });
 
-  const raw = message.content[0].text;
-  return parseTestCasesFromResponse(raw, endpoint);
+  const textBlock = message.content.find(block => block.type === 'text');
+  if (!textBlock) {
+    throw new Error('LLM response did not contain a text block');
+  }
+
+  return parseTestCasesFromResponse(textBlock.text, endpoint);
 }
 
 function buildPrompt(endpoint, strategy) {
@@ -201,7 +205,8 @@ function parseTestCasesFromResponse(raw, endpoint) {
       expectedBodyContains: tc.expectedBodyContains || null,
     }));
   } catch (err) {
-    throw new Error(`Failed to parse LLM response: ${err.message}\nRaw: ${raw.substring(0, 300)}`);
+    const preview = typeof raw === 'string' ? raw.substring(0, 300) : String(raw);
+    throw new Error(`Failed to parse LLM response: ${err.message}\nRaw: ${preview}`);
   }
 }
 

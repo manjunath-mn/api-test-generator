@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { LoaderContainer, LoaderSpinner, LoaderTitle, LoaderSteps, LoaderStep, LoaderStepIndicator, LoaderStepDot } from './Loader.styles';
 
 interface Props {
   title: string;
@@ -17,22 +18,22 @@ export default function Loader({ title, steps }: Props) {
   }, [steps]);
 
   return (
-    <div className="loader">
-      <div className="loader-spinner" />
-      <p className="loader-title">{title}</p>
-      <ul className="loader-steps">
+    <LoaderContainer>
+      <LoaderSpinner />
+      <LoaderTitle>{title}</LoaderTitle>
+      <LoaderSteps>
         {steps.map((step, i) => {
           const state = i < activeStep ? 'done' : i === activeStep ? 'active' : 'pending';
           return (
-            <li key={i} className={`loader-step loader-step--${state}`}>
-              <span className="loader-step-indicator">
-                {state === 'done' ? '✓' : state === 'active' ? <span className="loader-step-dot" /> : ''}
-              </span>
+            <LoaderStep key={i} $state={state}>
+              <LoaderStepIndicator>
+                {state === 'done' ? '✓' : state === 'active' ? <LoaderStepDot /> : ''}
+              </LoaderStepIndicator>
               {step}
-            </li>
+            </LoaderStep>
           );
         })}
-      </ul>
-    </div>
+      </LoaderSteps>
+    </LoaderContainer>
   );
 }

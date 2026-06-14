@@ -14,9 +14,13 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.102.0",
     "axios": "^1.15.1",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.10.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "google-auth-library": "^10.7.0",
+    "jsonwebtoken": "^9.0.3",
     "swagger-parser": "^10.0.3"
   },
   "devDependencies": {

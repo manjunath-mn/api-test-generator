@@ -1,7 +1,16 @@
 import { useState } from 'react';
 import { GenerateResponse, ExecuteResponse, TestCase } from '../services/api';
 import { buildReport, exportJSON, exportHTML } from '../services/reporter';
+import { saveReport } from '../services/reportsApi';
 import Loader from './Loader';
+import {
+  ResultsContainer, ResultsHeader, ApiInfo, VersionBadge, StrategyBadge, HeaderStats, Stat,
+  ResultsBody, EndpointSidebar, EndpointButton, EndpointPath, MethodBadge,
+  TestCasesList, TestCaseCard, TcHeader, CategoryDot, TcCategory, TcDesc, TcStatusBadge,
+  StatusPill, StatusPillTooltip, TcDetails, TcDetailRow, TcExecResult, ExecError,
+  ResultsFooter, ExecuteButton, NoBaseUrl, ExportGroup, ExportLabel, ExportButton, SaveButton,
+  BtnLoading, Spinner,
+} from './ResultsPanel.styles';
 
 const EXECUTE_STEPS = [
   'Preparing requests',
@@ -29,6 +38,8 @@ const CATEGORY_COLORS: Record<string, string> = {
 export default function ResultsPanel({ data, execResults, onExecute, executing }: Props) {
   const [activeEndpoint, setActiveEndpoint] = useState(0);
   const [expandedCase, setExpandedCase] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const allTestCases = data.results.flatMap(r => r.testCases);
   const endpoint = data.results[activeEndpoint];
@@ -55,97 +66,113 @@ export default function ResultsPanel({ data, execResults, onExecute, executing }
     return <Loader title="Executing test cases" steps={EXECUTE_STEPS} />;
   }
 
+  const handleSave = async () => {
+    if (!execResults) return;
+    setSaving(true);
+    try {
+      await saveReport(buildReport(data, execResults));
+      setSaved(true);
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <div className="results-panel">
-      <div className="results-header">
-        <div className="api-info">
+    <ResultsContainer>
+      <ResultsHeader>
+        <ApiInfo>
           <h2>{data.api.title}</h2>
-          <span className="version-badge">v{data.api.version}</span>
-          <span className="strategy-badge">{data.strategy}</span>
-        </div>
-        <div className="header-stats">
-          <div className="stat"><span className="stat-num">{data.totalEndpoints}</span><span className="stat-label">Endpoints</span></div>
-          <div className="stat"><span className="stat-num">{allTestCases.length}</span><span className="stat-label">Tests</span></div>
+          <VersionBadge>v{data.api.version}</VersionBadge>
+          <StrategyBadge>{data.strategy}</StrategyBadge>
+        </ApiInfo>
+        <HeaderStats>
+          <Stat><span className="stat-num">{data.totalEndpoints}</span><span className="stat-label">Endpoints</span></Stat>
+          <Stat><span className="stat-num">{allTestCases.length}</span><span className="stat-label">Tests</span></Stat>
           {execResults && (
             <>
-              <div className="stat green"><span className="stat-num">{execResults.summary.passed}</span><span className="stat-label">Passed</span></div>
-              <div className="stat red"><span className="stat-num">{execResults.summary.failed}</span><span className="stat-label">Failed</span></div>
+              <Stat $variant="green"><span className="stat-num">{execResults.summary.passed}</span><span className="stat-label">Passed</span></Stat>
+              <Stat $variant="red"><span className="stat-num">{execResults.summary.failed}</span><span className="stat-label">Failed</span></Stat>
             </>
           )}
-        </div>
-      </div>
+        </HeaderStats>
+      </ResultsHeader>
 
-      <div className="results-body">
-        <div className="endpoint-sidebar">
+      <ResultsBody>
+        <EndpointSidebar>
           {data.results.map((r, i) => (
-            <button key={i} className={`endpoint-btn ${activeEndpoint === i ? 'active' : ''}`} onClick={() => setActiveEndpoint(i)}>
-              <span className={`method-badge method-${r.endpoint.split(' ')[0].toLowerCase()}`}>{r.endpoint.split(' ')[0]}</span>
-              <span className="endpoint-path">{r.endpoint.split(' ')[1]}</span>
-            </button>
+            <EndpointButton key={i} $active={activeEndpoint === i} onClick={() => setActiveEndpoint(i)}>
+              <MethodBadge $method={r.endpoint.split(' ')[0].toLowerCase()}>{r.endpoint.split(' ')[0]}</MethodBadge>
+              <EndpointPath>{r.endpoint.split(' ')[1]}</EndpointPath>
+            </EndpointButton>
           ))}
-        </div>
+        </EndpointSidebar>
 
-        <div className="test-cases-list">
+        <TestCasesList>
           {endpoint.testCases.map((tc, i) => {
             const exec = getExecResult(tc.id);
             return (
-              <div
+              <TestCaseCard
                 key={tc.id}
-                className={`test-case-card ${expandedCase === i ? 'expanded' : ''}`}
+                $expanded={expandedCase === i}
                 onClick={() => setExpandedCase(expandedCase === i ? null : i)}
               >
-                <div className="tc-header">
-                  <span className="category-dot" style={{ background: CATEGORY_COLORS[tc.category] }} />
-                  <span className="tc-category">{tc.category}</span>
-                  <span className="tc-desc">{tc.description}</span>
-                  <span className="tc-status-badge">
+                <TcHeader>
+                  <CategoryDot $color={CATEGORY_COLORS[tc.category]} />
+                  <TcCategory>{tc.category}</TcCategory>
+                  <TcDesc>{tc.description}</TcDesc>
+                  <TcStatusBadge>
                     {exec ? (
-                      <span className={`status-pill status-pill--${exec.result.passed ? 'pass' : 'fail'}`}>
+                      <StatusPill $variant={exec.result.passed ? 'pass' : 'fail'}>
                         {exec.result.passed ? 'PASS' : 'FAIL'}
-                        <span className="status-pill-tooltip">{getTooltip(exec)}</span>
-                      </span>
+                        <StatusPillTooltip className="status-pill-tooltip">{getTooltip(exec)}</StatusPillTooltip>
+                      </StatusPill>
                     ) : (
-                      <span className="status-pill status-pill--pending">{tc.expectedStatus}</span>
+                      <StatusPill $variant="pending">{tc.expectedStatus}</StatusPill>
                     )}
-                  </span>
-                </div>
+                  </TcStatusBadge>
+                </TcHeader>
                 {expandedCase === i && (
-                  <div className="tc-details">
-                    <div className="tc-detail-row"><strong>Method:</strong> {tc.method}</div>
-                    <div className="tc-detail-row"><strong>Path:</strong> {tc.path}</div>
+                  <TcDetails>
+                    <TcDetailRow><strong>Method:</strong> {tc.method}</TcDetailRow>
+                    <TcDetailRow><strong>Path:</strong> {tc.path}</TcDetailRow>
                     {Object.keys(tc.headers).length > 0 && (
-                      <div className="tc-detail-row"><strong>Headers:</strong><pre>{JSON.stringify(tc.headers, null, 2)}</pre></div>
+                      <TcDetailRow><strong>Headers:</strong><pre>{JSON.stringify(tc.headers, null, 2)}</pre></TcDetailRow>
                     )}
                     {tc.body ?(
-                      <div className="tc-detail-row"><strong>Body:</strong><pre>{JSON.stringify(tc.body, null, 2)}</pre></div>
+                      <TcDetailRow><strong>Body:</strong><pre>{JSON.stringify(tc.body, null, 2)}</pre></TcDetailRow>
                     ) : <></>}
                     {exec && (
-                      <div className="tc-exec-result">
+                      <TcExecResult>
                         <strong>Actual Status:</strong> {exec.result.actualStatus} | <strong>Duration:</strong> {exec.result.duration}ms
-                        {exec.result.error && <div className="exec-error">{exec.result.error}</div>}
-                      </div>
+                        {exec.result.error && <ExecError>{exec.result.error}</ExecError>}
+                      </TcExecResult>
                     )}
-                  </div>
+                  </TcDetails>
                 )}
-              </div>
+              </TestCaseCard>
             );
           })}
-        </div>
-      </div>
+        </TestCasesList>
+      </ResultsBody>
 
-      <div className="results-footer">
-        <button className="execute-btn" onClick={() => onExecute(allTestCases, data.api.baseUrl)} disabled={executing || !data.api.baseUrl}>
-          {executing ? <span className="btn-loading"><span className="spinner" /> Executing...</span> : '▶ Execute Tests'}
-        </button>
-        {!data.api.baseUrl && <span className="no-baseurl">No base URL — execution disabled</span>}
+      <ResultsFooter>
+        <ExecuteButton onClick={() => onExecute(allTestCases, data.api.baseUrl)} disabled={executing || !data.api.baseUrl}>
+          {executing ? <BtnLoading><Spinner /> Executing...</BtnLoading> : '▶ Execute Tests'}
+        </ExecuteButton>
+        {!data.api.baseUrl && <NoBaseUrl>No base URL — execution disabled</NoBaseUrl>}
         {execResults && (
-          <div className="export-group">
-            <span className="export-label">Export report</span>
-            <button className="export-btn" onClick={() => exportJSON(buildReport(data, execResults))}>JSON</button>
-            <button className="export-btn" onClick={() => exportHTML(buildReport(data, execResults))}>HTML</button>
-          </div>
+          <ExportGroup>
+            <ExportLabel>Export report</ExportLabel>
+            <ExportButton onClick={() => exportJSON(buildReport(data, execResults))}>JSON</ExportButton>
+            <ExportButton onClick={() => exportHTML(buildReport(data, execResults))}>HTML</ExportButton>
+            <SaveButton onClick={handleSave} disabled={saving || saved}>
+              {saved ? 'Saved ✓' : saving ? 'Saving...' : 'Save Report'}
+            </SaveButton>
+          </ExportGroup>
         )}
-      </div>
-    </div>
+      </ResultsFooter>
+    </ResultsContainer>
   );
 }

@@ -1,7 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import UploadPanel from './components/UploadPanel';
 import ResultsPanel from './components/ResultsPanel';
 import Loader from './components/Loader';
+import { AuthModal } from './components/AuthModal';
+import Nav, { View } from './components/Nav';
+import ProfilePage from './components/ProfilePage';
+import ReportsPage from './components/ReportsPage';
 
 const GENERATE_STEPS = [
   'Reading the specification',
@@ -12,15 +16,42 @@ const GENERATE_STEPS = [
   'Assembling your test suite',
 ];
 import { generateTests, executeTests, GenerateResponse, ExecuteResponse, TestCase } from './services/api';
-import './App.css';
+import { AppContainer, AppHeader, Logo, LogoIcon, LogoText, HeaderActions, UserEmail, BackButton, AppMain, ErrorBanner } from './App.styles';
 
 export default function App() {
+  const [token, setToken] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [view, setView] = useState<View>('testing');
   const [stage, setStage] = useState<'upload' | 'results'>('upload');
   const [loading, setLoading] = useState(false);
   const [executing, setExecuting] = useState(false);
   const [data, setData] = useState<GenerateResponse | null>(null);
   const [execResults, setExecResults] = useState<ExecuteResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem('authToken');
+    const savedEmail = localStorage.getItem('authEmail');
+    if (savedToken) {
+      setToken(savedToken);
+      setEmail(savedEmail);
+    }
+  }, []);
+
+  const handleAuthSuccess = (newToken: string, newEmail: string) => {
+    setToken(newToken);
+    setEmail(newEmail);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authEmail');
+    setToken(null);
+    setEmail(null);
+    setStage('upload');
+    setData(null);
+    setExecResults(null);
+  };
 
   const handleGenerate = async ({ specInput, baseUrl, strategy }: { specInput: string; baseUrl: string; strategy: string }) => {
     setLoading(true);
@@ -54,32 +85,51 @@ export default function App() {
   };
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <div className="logo">
-          <span className="logo-icon">⚡</span>
-          <span className="logo-text">API<strong>Test</strong>Genx</span>
-        </div>
-        {stage === 'results' && (
-          <button className="back-btn" onClick={() => { setStage('upload'); setData(null); setExecResults(null); }}>
-            ← New Spec
-          </button>
-        )}
-      </header>
+    <AppContainer>
+      {!token ? (
+        <AuthModal onAuthSuccess={handleAuthSuccess} />
+      ) : (
+        <>
+          <AppHeader>
+            <Logo>
+              <LogoIcon>⚡</LogoIcon>
+              <LogoText>API<strong>Test</strong>Genx</LogoText>
+            </Logo>
+            <Nav active={view} onChange={setView} />
+            <HeaderActions>
+              <UserEmail>{email}</UserEmail>
+              {view === 'testing' && stage === 'results' && (
+                <BackButton onClick={() => { setStage('upload'); setData(null); setExecResults(null); }}>
+                  ← New Spec
+                </BackButton>
+              )}
+              <BackButton onClick={handleLogout}>
+                Logout
+              </BackButton>
+            </HeaderActions>
+          </AppHeader>
 
-      <main className="app-main">
-        {error && (
-          <div className="error-banner">
-            <strong>Error:</strong> {error}
-            <button onClick={() => setError(null)}>✕</button>
-          </div>
-        )}
-        {stage === 'upload' && !loading && <UploadPanel onSubmit={handleGenerate} loading={loading} />}
-        {loading && <Loader title="Generating your test suite" steps={GENERATE_STEPS} />}
-        {stage === 'results' && data && (
-          <ResultsPanel data={data} execResults={execResults} onExecute={handleExecute} executing={executing} />
-        )}
-      </main>
-    </div>
+          <AppMain>
+            {error && (
+              <ErrorBanner>
+                <strong>Error:</strong> {error}
+                <button onClick={() => setError(null)}>✕</button>
+              </ErrorBanner>
+            )}
+            {view === 'testing' && (
+              <>
+                {stage === 'upload' && !loading && <UploadPanel onSubmit={handleGenerate} loading={loading} />}
+                {loading && <Loader title="Generating your test suite" steps={GENERATE_STEPS} />}
+                {stage === 'results' && data && (
+                  <ResultsPanel data={data} execResults={execResults} onExecute={handleExecute} executing={executing} />
+                )}
+              </>
+            )}
+            {view === 'reports' && <ReportsPage />}
+            {view === 'profile' && <ProfilePage email={email ?? ''} token={token ?? ''} />}
+          </AppMain>
+        </>
+      )}
+    </AppContainer>
   );
 }
