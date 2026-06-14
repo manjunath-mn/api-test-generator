@@ -3,3 +3,12 @@ client/node_modules/
 server/node_modules/
 .env
 dist/
+
+# SQLite database + WAL/SHM files (local dev data, never commit)
+server/*.db
+server/*.db-shm
+server/*.db-wal
+
+# Editor/OS
+.DS_Store
+*.log
