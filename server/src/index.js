@@ -12,7 +12,16 @@ const { verifyToken } = require('./middleware/auth');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
+const allowedOrigins = [
+  'https://api-test-generator-topaz.vercel.app',
+  'http://localhost:5173',
+  process.env.CLIENT_URL
+].filter(Boolean); // removes undefined if CLIENT_URL isn't set
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
