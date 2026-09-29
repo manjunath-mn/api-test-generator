@@ -7,6 +7,12 @@ export const NavBar = styled.nav`
   border: 1px solid ${({ theme }) => theme.border};
   border-radius: ${({ theme }) => theme.radius};
   padding: 0.25rem;
+
+  @media (max-width: 768px) {
+    order: 3;           /* push below logo + actions row */
+    width: 100%;
+    justify-content: stretch;
+  }
 `;
 
 export const NavButton = styled.button<{ $active: boolean }>`
@@ -32,4 +38,9 @@ export const NavButton = styled.button<{ $active: boolean }>`
     color: white;
     box-shadow: 0 2px 8px rgba(107, 92, 231, 0.35);
   `}
+
+  @media (max-width: 768px) {
+    flex: 1;
+    text-align: center;
+  }
 `;

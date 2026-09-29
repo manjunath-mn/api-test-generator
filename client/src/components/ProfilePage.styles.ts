@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 
 export const Panel = styled.div`
-  max-width: 480px;
-  margin: 3rem auto;
+  max-width: 520px;
+  margin: 2.5rem auto;
   background: ${({ theme }) => theme.surface};
   border: 1px solid ${({ theme }) => theme.border};
   border-radius: 16px;
@@ -10,18 +10,26 @@ export const Panel = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  box-sizing: border-box;
+
+  @media (max-width: 560px) {
+    margin: 1rem auto;
+    border-radius: 12px;
+    padding: 1.5rem 1.25rem;
+  }
 `;
 
 export const PanelHeader = styled.div`
   h2 {
     font-size: 1.5rem;
     font-weight: 800;
-    margin-bottom: 0.25rem;
+    margin: 0 0 0.25rem;
   }
 
   p {
     color: ${({ theme }) => theme.textMuted};
     font-size: 0.9rem;
+    margin: 0;
   }
 `;
 
@@ -45,6 +53,7 @@ export const InfoRow = styled.div`
   span:last-child {
     font-size: 0.95rem;
     font-family: ${({ theme }) => theme.fontMono};
+    word-break: break-all;
   }
 `;
 
@@ -52,21 +61,28 @@ export const AvatarSection = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 `;
 
 export const AvatarInfo = styled.div`
   flex: 1;
+  min-width: 0;
 `;
 
 export const AvatarName = styled.div`
   font-size: 1rem;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export const AvatarEmail = styled.div`
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: ${({ theme }) => theme.textMuted};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export const BreakSpan = styled.span`
@@ -75,8 +91,8 @@ export const BreakSpan = styled.span`
 `;
 
 export const Avatar = styled.div<{ $src?: string }>`
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   background: ${({ theme, $src }) =>
     $src
@@ -86,7 +102,7 @@ export const Avatar = styled.div<{ $src?: string }>`
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: bold;
   flex-shrink: 0;
 `;
@@ -114,17 +130,19 @@ export const FormGroup = styled.div`
   input,
   textarea {
     padding: 0.75rem;
-    border: 1px solid ${({ theme }) => theme.border};
+    border: 1.5px solid ${({ theme }) => theme.border};
     border-radius: ${({ theme }) => theme.radius};
     background: ${({ theme }) => theme.surface};
     color: ${({ theme }) => theme.text};
     font-size: 0.95rem;
     font-family: inherit;
+    box-sizing: border-box;
+    width: 100%;
 
     &:focus {
       outline: none;
       border-color: ${({ theme }) => theme.accent};
-      box-shadow: 0 0 0 2px ${({ theme }) => theme.accent}40;
+      box-shadow: 0 0 0 3px ${({ theme }) => theme.accent}33;
     }
   }
 
@@ -138,6 +156,10 @@ export const ButtonGroup = styled.div`
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
+
+  @media (max-width: 480px) {
+    flex-direction: column-reverse;
+  }
 `;
 
 export const Button = styled.button<{ $variant?: 'primary' | 'secondary' }>`
@@ -169,4 +191,3 @@ export const Button = styled.button<{ $variant?: 'primary' | 'secondary' }>`
     cursor: not-allowed;
   }
 `;
-
