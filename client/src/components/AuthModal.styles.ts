@@ -1,111 +1,280 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
-export const Overlay = styled.div`
+const fadeUp = keyframes`
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
+
+export const Page = styled.div`
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  min-height: 100vh;
+  font-family: inherit;
 `;
 
-export const Modal = styled.div`
-  background-color: white;
-  border-radius: 8px;
-  padding: 40px;
-  max-width: 400px;
-  width: 100%;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-`;
-
-export const Title = styled.h1`
-  margin: 0 0 8px;
-  font-size: 28px;
-  font-weight: bold;
-  color: #1a1a1a;
-`;
-
-export const Subtitle = styled.p`
-  margin: 0 0 24px;
-  font-size: 14px;
-  color: #666;
-`;
-
-export const ErrorMessage = styled.div`
-  background-color: #fee;
-  color: #c33;
-  padding: 12px;
-  border-radius: 4px;
-  margin-bottom: 16px;
-  font-size: 14px;
-`;
-
-export const Form = styled.form`
+/* ── Left panel ── */
+export const LeftPanel = styled.div`
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
-`;
+  justify-content: center;
+  padding: 60px 56px;
+  background: linear-gradient(145deg, #0f0c29, #302b63, #24243e);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
 
-export const Input = styled.input`
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  font-family: inherit;
-  box-sizing: border-box;
-`;
+  &::before {
+    content: '';
+    position: absolute;
+    top: -120px;
+    left: -120px;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
 
-export const SubmitButton = styled.button`
-  padding: 10px 16px;
-  background-color: #0066cc;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    right: -80px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
 
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+  @media (max-width: 768px) {
+    display: none;
   }
 `;
 
+export const LogoBadge = styled.div`
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+  font-size: 26px;
+`;
+
+export const BrandTitle = styled.h1`
+  font-size: 36px;
+  font-weight: 800;
+  margin: 0 0 16px;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+  color: #fff;
+`;
+
+export const BrandDescription = styled.p`
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0 0 48px;
+  max-width: 360px;
+`;
+
+export const FeatureList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+export const FeatureItem = styled.li`
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
+`;
+
+export const FeatureIcon = styled.span`
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.25);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  margin-top: 1px;
+`;
+
+/* ── Right panel ── */
+export const RightPanel = styled.div`
+  width: 480px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 48px;
+  background: #fff;
+  overflow-y: auto;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 40px 24px;
+  }
+`;
+
+export const FormHeader = styled.div`
+  margin-bottom: 32px;
+  animation: ${fadeUp} 0.4s ease both;
+`;
+
+export const FormTitle = styled.h2`
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px;
+`;
+
+export const FormSubtitle = styled.p`
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+`;
+
+export const ErrorMessage = styled.div`
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 12px 14px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  animation: ${fadeUp} 0.2s ease both;
+`;
+
 export const GoogleButtonWrapper = styled.div`
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: center;
+  animation: ${fadeUp} 0.4s ease 0.05s both;
+
+  & > div {
+    width: 100% !important;
+  }
 `;
 
 export const Divider = styled.div`
   display: flex;
   align-items: center;
-  text-align: center;
-  color: #999;
+  color: #94a3b8;
   font-size: 12px;
-  margin: 0 0 16px;
+  margin-bottom: 20px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  animation: ${fadeUp} 0.4s ease 0.1s both;
 
   &::before, &::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  &::before { margin-right: 12px; }
+  &::after  { margin-left: 12px; }
+`;
+
+export const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+  animation: ${fadeUp} 0.4s ease 0.15s both;
+`;
+
+export const InputLabel = styled.label`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+`;
+
+export const Input = styled.input`
+  padding: 11px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #0f172a;
+  background: #f8fafc;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  outline: none;
+
+  &::placeholder { color: #94a3b8; }
+
+  &:focus {
+    border-color: #6366f1;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+  }
+`;
+
+export const SubmitButton = styled.button`
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  margin-top: 4px;
+
+  &:hover:not(:disabled) {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
   }
 
-  &::before { margin-right: 12px; }
-  &::after { margin-left: 12px; }
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+export const ToggleRow = styled.p`
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+  margin: 0;
+  animation: ${fadeUp} 0.4s ease 0.2s both;
 `;
 
 export const ToggleButton = styled.button`
-  padding: 0;
-  background-color: transparent;
-  color: #0066cc;
+  background: none;
   border: none;
-  font-size: 14px;
+  color: #6366f1;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  text-decoration: underline;
+  padding: 0;
+  margin-left: 4px;
+
+  &:hover { text-decoration: underline; }
 `;
