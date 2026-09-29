@@ -22,6 +22,13 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
+
+// Required for Google OAuth popup to communicate back to the parent window
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  next();
+});
+
 app.use(express.json({ limit: '10mb' }));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
