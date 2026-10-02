@@ -34,7 +34,7 @@ const corsOptions = {
 };
 
 // Handle preflight for all routes before any middleware that might reject early
-app.options('*', cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 app.use(cors(corsOptions));
 
 // Required for Google OAuth popup to communicate back to the parent window
